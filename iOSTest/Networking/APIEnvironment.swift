@@ -41,9 +41,9 @@ enum APIEnvironment: EnvironmentProtocol {
     var baseURL: String {
         switch self {
         case .development:
-            return "http://api.localhost:3000/v1/"
+            return ""
         case .production:
-            return "https://api.yourapp.com/v1/"
+            return "https://randomuser.me/"
         }
     }
 }

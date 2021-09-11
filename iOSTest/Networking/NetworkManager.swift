@@ -29,9 +29,8 @@ extension Method {
 
 
 enum ConfigureURL {
-    static let BASE_URL         = "https://loyaltyhubapp.com/drawino/webservices/"
-    static let LOGIN            = "user/login"
-    static let GET_TICKETS      = "tickets/get_tickets"
+    static let BASE_URL         = "https://randomuser.me/"
+    static let LOGIN            = "api/"
 }
 
 
@@ -43,17 +42,22 @@ class NetworkManager:NSObject {
     }
     
     func makeAPICall<T:Codable>(url: String,modelObject:T.Type, params: [String:Any], method: Method, callback:Callback<T,String>) {
-        guard let urlComponents = URL(string: ConfigureURL.BASE_URL + url) else { return }
-        print(params)
-        var  request = URLRequest(url: urlComponents)
-        let postString = NetworkManager.getPostString(params: params)
-        request.httpBody = postString.data(using: .utf8)
-        request.httpMethod = method.name
-        request.addValue("lovebake", forHTTPHeaderField: "APP-USER")
-        request.addValue("df014f04b7e13046a2d057c9f2ce3e2b", forHTTPHeaderField: "APP-PWD")
-        let boundary = "Boundary-\(UUID().uuidString)"
-        request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        guard var urlComponents = URLComponents(string: ConfigureURL.BASE_URL + url) else { return }
+
+        var queryItems = [URLQueryItem]()
+        for (key,value) in params {
+            queryItems.append(URLQueryItem(name:key, value: value as? String))
+        }
+        urlComponents.queryItems = queryItems
+        print("Request URL is:\(urlComponents.url!.absoluteString)")
         
+        var  request = URLRequest(url: urlComponents.url!)
+        request.httpMethod = method.name
+        if method.name == "POST" {
+            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        }else{
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         session.dataTask(with: request) { (data, response, error) -> Void in
             if let data = data {
                 print(String(data: data, encoding: .utf8)!)

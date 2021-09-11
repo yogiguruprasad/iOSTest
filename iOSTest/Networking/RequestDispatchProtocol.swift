@@ -10,11 +10,11 @@ import Foundation
 /// The expected result of an API Operation.
 enum OperationResult {
     /// JSON reponse.
-    case json(_ : Any?, _ : HTTPURLResponse?)
+    case json(result : Any?, _ : HTTPURLResponse?)
     /// A downloaded file with an URL.
-    case file(_ : URL?, _ : HTTPURLResponse?)
+    case file(fileURL : URL?, _ : HTTPURLResponse?)
     /// An error.
-    case error(_ : Error?, _ : HTTPURLResponse?)
+    case error(errorResponse : Error?, _ : HTTPURLResponse?)
 }
 
 /// Protocol to which a request dispatcher must conform to.

@@ -49,7 +49,7 @@ class APIRequestDispatcher: RequestDispatcherProtocol {
     func execute(request: RequestProtocol, completion: @escaping (OperationResult) -> Void) -> URLSessionTask? {
         // Create a URL request.
         guard var urlRequest = request.urlRequest(with: environment) else {
-            completion(.error(APIError.badRequest("Invalid URL for: \(request)"), nil))
+            completion(.error(errorResponse: APIError.badRequest("Invalid URL for: \(request)"), nil))
             return nil
         }
         // Add the environment specific headers.
@@ -90,7 +90,7 @@ class APIRequestDispatcher: RequestDispatcherProtocol {
     private func handleJsonTaskResponse(data: Data?, urlResponse: URLResponse?, error: Error?, completion: @escaping (OperationResult) -> Void) {
         // Check if the response is valid.
         guard let urlResponse = urlResponse as? HTTPURLResponse else {
-            completion(OperationResult.error(APIError.invalidResponse, nil))
+            completion(OperationResult.error(errorResponse: APIError.invalidResponse, nil))
             return
         }
         // Verify the HTTP status code.
@@ -102,16 +102,16 @@ class APIRequestDispatcher: RequestDispatcherProtocol {
             switch parseResult {
             case .success(let json):
                 DispatchQueue.main.async {
-                    completion(OperationResult.json(json, urlResponse))
+                    completion(OperationResult.json(result: json, urlResponse))
                 }
             case .failure(let error):
                 DispatchQueue.main.async {
-                    completion(OperationResult.error(error, urlResponse))
+                    completion(OperationResult.error(errorResponse: error, urlResponse))
                 }
             }
         case .failure(let error):
             DispatchQueue.main.async {
-                completion(OperationResult.error(error, urlResponse))
+                completion(OperationResult.error(errorResponse: error, urlResponse))
             }
         }
     }
@@ -124,7 +124,7 @@ class APIRequestDispatcher: RequestDispatcherProtocol {
     ///   - completion: Completion handler.
     private func handleFileTaskResponse(fileUrl: URL?, urlResponse: URLResponse?, error: Error?, completion: @escaping (OperationResult) -> Void) {
         guard let urlResponse = urlResponse as? HTTPURLResponse else {
-            completion(OperationResult.error(APIError.invalidResponse, nil))
+            completion(OperationResult.error(errorResponse: APIError.invalidResponse, nil))
             return
         }
 
@@ -132,12 +132,12 @@ class APIRequestDispatcher: RequestDispatcherProtocol {
         switch result {
         case .success(let url):
             DispatchQueue.main.async {
-                completion(OperationResult.file(url as? URL, urlResponse))
+                completion(OperationResult.file(fileURL: url as? URL, urlResponse))
             }
 
         case .failure(let error):
             DispatchQueue.main.async {
-                completion(OperationResult.error(error, urlResponse))
+                completion(OperationResult.error(errorResponse: error, urlResponse))
             }
         }
     }
